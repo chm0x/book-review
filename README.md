@@ -79,4 +79,5 @@ Lowest Rating
 ### With Models
 ```
 > \App\Models\Book::popular()->highestRated()->get();
+> \App\Models\Book::highestRated('2023-02-01', '2023-03-3-')popular('2023-02-01', '2023-03-30')->minReviews(2)->get();
 ```
