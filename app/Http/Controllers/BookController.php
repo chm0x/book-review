@@ -14,6 +14,7 @@ class BookController extends Controller
     public function index(Request $request)
     {
         $title = $request->input('title');
+        $filter = $request->input('filter', '');
 
         # SQL TRANSLATE: "select * from `books` where `title` LIKE ?"
         $books = Book::when(
