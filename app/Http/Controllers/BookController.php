@@ -16,19 +16,24 @@ class BookController extends Controller
         $title = $request->input('title');
         $filter = $request->input('filter', '');
 
-        # SQL TRANSLATE: "select * from `books` where `title` LIKE ?"
         $books = Book::when(
             $title, 
             fn ($query, $title) => $query->title($title)
-        )
-        ->get();
-        // $book = Book::when($title, function($query, $title){
-        //     return $query->title($title);
-        // })
-        // ->get();
+        );
 
-        # ITS THE SAME
-        // return view('books.index', compact('books'));
+        $books = match($filter){
+            'popular_last_month' => $books->popularLastMonth(), 
+            'popular_last_6months' => $books->popularLast6Months(), 
+            'highest_rated_last_month' => $books->highestRatedLastMonth(), 
+            'highest_rated_last_6month' => $books->highestRatedLast6Months(), 
+            # The default, if there is empty (or not filter)
+            default => $books->latest()
+
+        };
+
+        $books = $books->get();
+
+
         return view('books.index', [ "books" => $books ]);
     }
 
