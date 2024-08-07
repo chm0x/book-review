@@ -28,10 +28,9 @@ class BookController extends Controller
             'highest_rated_last_6month' => $books->highestRatedLast6Months(), 
             # The default, if there is empty (or not filter)
             default => $books->latest()
-
         };
 
-        $books = $books->get();
+        $books = $books->get(); 
 
 
         return view('books.index', [ "books" => $books ]);
@@ -56,9 +55,16 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Book $book)
     {
-        return 'Hello World: Show Book.';
+        # ALREADY LOADED
+        // Book::with('reviews')->findOneOrFail();
+        return view('books.show', [ 
+            # LOAD THE RELATION FROM reviews
+            'book' => $book->load([
+                'reviews' => fn ($query) => $query->latest()
+            ])
+         ] );
     }
 
     /**
