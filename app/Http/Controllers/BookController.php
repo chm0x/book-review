@@ -28,10 +28,10 @@ class BookController extends Controller
             'highest_rated_last_month' => $books->highestRatedLastMonth(), 
             'highest_rated_last_6month' => $books->highestRatedLast6Months(), 
             # The default, if there is empty (or not filter)
-            default => $books->latest()
+            default => $books->latest()->withAvgRating()->withReviewsCount()
         };
 
-        // $books = $books->get(); 
+        $books = $books->get(); 
 
         # remember(keyname, 
         #           how long you want to store the data example 3600 seconds(equal one hour), 
@@ -45,7 +45,7 @@ class BookController extends Controller
         //     dd('Not from cache!');
         //     return $books->get();   
         // });
-        $books = cache()->remember($cacheKey, 3600, fn() => $books->get());
+        // $books = cache()->remember($cacheKey, 3600, fn() => $books->get());
 
 
         return view('books.index', [ "books" => $books ]);
@@ -70,13 +70,17 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Book $book)
+    public function show(int $id)
     {
-        $cacheKey = 'book:'.$book->id;
+        $cacheKey = 'book:'.$id;
 
-        $book = cache()->remember($cacheKey, 3600, fn() => $book->load([
-            'reviews' => fn($query) => $query->latest()
-        ]));
+        $book = cache()->remember(
+            $cacheKey, 
+            3600, 
+            fn() => Book::with([
+                'reviews' => fn($query) => $query->latest()
+            ])->withAvgRating()->withReviewsCount()->findOrFail($id)
+        );
         
         // return view('books.show', [ 
         //     # LOAD THE RELATION FROM reviews
